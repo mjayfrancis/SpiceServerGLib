@@ -1,0 +1,12 @@
+.cproject
+.libs
+.project
+.pydevproject
+.settings
+*.gir
+*.typelib
+*.lo
+*.o
+*.la
+ssg-enum-types.[ch]
+
