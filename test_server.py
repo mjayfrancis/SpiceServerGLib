@@ -111,12 +111,14 @@ class ClientHelper(SpiceClientGLib.Session):
         self._channel_callbacks = {
             SpiceClientGLib.MainChannel: self._main_channel_new,
             SpiceClientGLib.DisplayChannel: self._display_channel_new,
-            SpiceClientGLib.InputsChannel: self._inputs_channel_new
+            SpiceClientGLib.InputsChannel: self._inputs_channel_new,
+            SpiceClientGLib.PortChannel: self._port_channel_new
         }
         self._channels = {
             SpiceClientGLib.MainChannel: [],
             SpiceClientGLib.DisplayChannel: [],
-            SpiceClientGLib.InputsChannel: []
+            SpiceClientGLib.InputsChannel: [],
+            SpiceClientGLib.PortChannel: []
         }
         future_dict_factory = lambda: defaultdict(asyncio.Future)
         self._channel_opened_futures = defaultdict(future_dict_factory)
@@ -163,6 +165,9 @@ class ClientHelper(SpiceClientGLib.Session):
         channel.connect()
 
     def _inputs_channel_new(self,channel):
+        channel.connect()
+
+    def _port_channel_new(self,channel):
         channel.connect()
 
     def connect(self):
@@ -324,8 +329,6 @@ class MyTest(ServerTestCaseBase):
         event = asyncio.Event()
         GObject.GObject.connect(self.client, "notify::name", lambda a,b: event.set())
         self.client.connect()
-
-        # When
         await event.wait()
 
         # Then
@@ -381,6 +384,16 @@ class MyTest(ServerTestCaseBase):
 
         # Then
         self.assertEqual(action, ('position', {'x': 10, 'y': 20, 'buttons_state': 1}))
+
+    async def testCharDevice(self):
+        # Given
+        char_device_instance = SpiceServerGLib.CharDeviceInstance(subtype="port",portname="test.port")
+        self.server.add_interface(char_device_instance)
+        self.client.connect()
+        port_channel = await self.client.wait_channel_opened(SpiceClientGLib.PortChannel)
+
+        # Then
+        self.assertEqual(port_channel.props.port_name, "test.port")
 
 
 

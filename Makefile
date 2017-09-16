@@ -31,6 +31,9 @@ ssg-keyboard-instance.lo: ssg-keyboard-instance.c ssg-keyboard-instance.h
 ssg-tablet-instance.lo: ssg-tablet-instance.c ssg-tablet-instance.h
 	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-tablet-instance.c -o ssg-tablet-instance.lo
 
+ssg-char-device-instance.lo: ssg-char-device-instance.c ssg-char-device-instance.h
+	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-char-device-instance.c -o ssg-char-device-instance.lo
+
 ssg-mouse-instance.lo: ssg-mouse-instance.c ssg-mouse-instance.h
 	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-mouse-instance.c -o ssg-mouse-instance.lo
 
@@ -49,11 +52,11 @@ ssg-qxl-cursor-move-command.lo: ssg-qxl-cursor-move-command.c ssg-qxl-cursor-mov
 	
 
 libspiceserverglib.la: ssg-server.lo ssg-baseinstance.lo ssg-qxl-instance.lo ssg-keyboard-instance.lo \
-						  ssg-tablet-instance.lo ssg-mouse-instance.lo ssg-enum-types.lo ssg-qxl-command.lo \
+						  ssg-tablet-instance.lo ssg-mouse-instance.lo ssg-char-device-instance.lo ssg-enum-types.lo ssg-qxl-command.lo \
 						  ssg-qxl-draw-copy-command.lo ssg-qxl-cursor-set-command.lo ssg-qxl-cursor-move-command.lo
 	libtool link gcc `pkg-config --libs gobject-2.0 spice-server cairo` -rpath /usr/local/lib ssg-server.lo \
 			ssg-baseinstance.lo ssg-qxl-instance.lo ssg-keyboard-instance.lo ssg-tablet-instance.lo \
-			ssg-mouse-instance.lo ssg-enum-types.lo ssg-qxl-command.lo ssg-qxl-draw-copy-command.lo \
+			ssg-mouse-instance.lo ssg-char-device-instance.lo ssg-enum-types.lo ssg-qxl-command.lo ssg-qxl-draw-copy-command.lo \
 			ssg-qxl-cursor-set-command.lo ssg-qxl-cursor-move-command.lo -o libspiceserverglib.la
 
 SpiceServerGLib-0.1.typelib: libspiceserverglib.la
@@ -64,6 +67,7 @@ SpiceServerGLib-0.1.typelib: libspiceserverglib.la
 			ssg-keyboard-instance.[ch] \
 			ssg-tablet-instance.[ch] \
 			ssg-mouse-instance.[ch] \
+			ssg-char-device-instance.[ch] \
 			ssg-qxl-command.[ch] \
 			ssg-qxl-draw-copy-command.[ch] \
 			ssg-enum-types.[ch] \

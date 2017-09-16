@@ -89,6 +89,7 @@ enum
     PROP_NAME,
     PROP_UUID,
     PROP_SEAMLESS_MIGRATION,
+    PROP_CHAR_DEVICE_RECOGNIZED_SUBTYPES,
     N_PROPERTIES
 };
 
@@ -601,6 +602,11 @@ ssg_server_get_property (GObject    *object,
               GParamSpec *pspec)
 {
     switch (property_id) {
+
+        case PROP_CHAR_DEVICE_RECOGNIZED_SUBTYPES:
+            g_value_set_boxed(value, spice_server_char_device_recognized_subtypes());
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -884,6 +890,16 @@ ssg_server_class_init (SsgServerClass *klass)
                     FALSE,
                     G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
+
+    /**
+     * SsgServer:char-device-recognized-subtypes: (array zero-terminated=1) (transfer none):
+     */
+    obj_properties[PROP_CHAR_DEVICE_RECOGNIZED_SUBTYPES] =
+            g_param_spec_boxed("char-device-recognized-subtypes",
+                    "Char device recognized subtypes",
+                    "TODO",
+                    G_TYPE_STRV,
+                    G_PARAM_READABLE);
 
 
     g_object_class_install_properties (object_class, N_PROPERTIES, obj_properties);
