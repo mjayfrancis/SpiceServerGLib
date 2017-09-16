@@ -1,6 +1,6 @@
 all: SpiceServerGLib-0.1.typelib
 
-SPICE_SERVER_INCLUDE_DIR=$(shell pkg-config --cflags spice-server | sed -e 's/ -I/ /g' -e 's/ /\n/g' | grep 'spice-server$$')
+SPICE_SERVER_INCLUDE_DIR=$(shell pkg-config --cflags spice-server | sed -e 's/-I//g' -e 's/ /\n/g' | grep 'spice-server$$')
 
 ssg-enum-types.h:
 	glib-mkenums --symbol-prefix ssg --template ssg-enum-types.h.template $(SPICE_SERVER_INCLUDE_DIR)/spice-server.h ssg-fixup-enum-types.h \
