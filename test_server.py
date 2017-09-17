@@ -464,6 +464,11 @@ class MyTest(ServerTestCaseBase):
 
 
 
+# XXX Temporary: patch SpiceClientGLib.PortChannel if method-name fix has not been applied
+if not hasattr(SpiceClientGLib.PortChannel, "event"):
+     SpiceClientGLib.PortChannel.event = lambda self,a: SpiceClientGLib.port_event(self,a)
+     SpiceClientGLib.PortChannel.write_async = lambda self,a,b,c,d: SpiceClientGLib.port_write_async(self,a,b,c,d)
+     SpiceClientGLib.PortChannel.write_finish = lambda self,a: SpiceClientGLib.port_write_finish(self,a)
 
 if __name__ == "__main__":
         unittest.main()
