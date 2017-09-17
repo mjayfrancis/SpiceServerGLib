@@ -61,6 +61,8 @@ char_device_write(SpiceCharDeviceInstance *sin, const uint8_t *buf, int len)
 
     g_signal_emit(priv->self, ssg_char_device_instance_signals[WRITE], 0, buf_bytes, &result);
 
+    g_bytes_unref(buf_bytes);
+
     return result;
 }
 
@@ -83,6 +85,8 @@ char_device_read(SpiceCharDeviceInstance *sin, uint8_t *buf, int len)
         g_return_val_if_fail(bytes_read <= len, 0);
         memcpy(buf,g_bytes_get_data(result,NULL),bytes_read);
     }
+
+    g_bytes_unref(result);
 
     return bytes_read;
 
