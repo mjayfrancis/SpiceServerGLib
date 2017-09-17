@@ -696,7 +696,7 @@ ssg_server_class_init (SsgServerClass *klass)
                     0,
                     G_MAXINT,
                     0,
-                    G_PARAM_READWRITE |
+                    G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
     obj_properties[PROP_TICKET_PASSWD] =
@@ -739,7 +739,7 @@ ssg_server_class_init (SsgServerClass *klass)
                     -1,
                     65535,
                     -1,
-                    G_PARAM_READWRITE |
+                    G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
     obj_properties[PROP_TLS_CA_CERT_FILE] =
@@ -772,7 +772,7 @@ ssg_server_class_init (SsgServerClass *klass)
                     "TODO",
                     SSG_TYPE_SPICE_IMAGE_COMPRESSION_T,
                     SPICE_IMAGE_COMPRESSION_QUIC,
-                    G_PARAM_READWRITE |
+                    G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
     obj_properties[PROP_JPEG_COMPRESSION] =
@@ -781,7 +781,7 @@ ssg_server_class_init (SsgServerClass *klass)
                     "TODO",
                     SSG_TYPE_SPICE_WAN_COMPRESSION_T,
                     SPICE_WAN_COMPRESSION_AUTO,
-                    G_PARAM_READWRITE |
+                    G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
     obj_properties[PROP_ZLIB_GLZ_COMPRESSION] =
@@ -790,7 +790,7 @@ ssg_server_class_init (SsgServerClass *klass)
                     "TODO",
                     SSG_TYPE_SPICE_WAN_COMPRESSION_T,
                     SPICE_WAN_COMPRESSION_AUTO,
-                    G_PARAM_READWRITE |
+                    G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
     obj_properties[PROP_DEFAULT_CHANNEL_SECURITY] =
@@ -799,7 +799,7 @@ ssg_server_class_init (SsgServerClass *klass)
                     "TODO",
                     SSG_TYPE_SPICE_CHANNEL_SECURITY_T,
                     SPICE_CHANNEL_SECURITY_NONE,
-                    G_PARAM_READWRITE |
+                    G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
     obj_properties[PROP_SSL_CHANNELS] =
@@ -824,7 +824,7 @@ ssg_server_class_init (SsgServerClass *klass)
                     "TODO",
                     SSG_TYPE_SPICE_STREAM_VIDEO_T,
                     SPICE_STREAM_VIDEO_OFF,
-                    G_PARAM_READWRITE |
+                    G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
     obj_properties[PROP_VIDEO_CODECS] =
@@ -891,9 +891,6 @@ ssg_server_class_init (SsgServerClass *klass)
                     G_PARAM_WRITABLE |
                     G_PARAM_CONSTRUCT_ONLY);
 
-    /**
-     * SsgServer:char-device-recognized-subtypes: (array zero-terminated=1) (transfer none):
-     */
     obj_properties[PROP_CHAR_DEVICE_RECOGNIZED_SUBTYPES] =
             g_param_spec_boxed("char-device-recognized-subtypes",
                     "Char device recognized subtypes",
