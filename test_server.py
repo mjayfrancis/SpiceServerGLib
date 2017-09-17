@@ -2,6 +2,7 @@
 
 import asyncio
 import cairo
+import ctypes
 import gi
 import queue
 import sys
@@ -385,16 +386,81 @@ class MyTest(ServerTestCaseBase):
         # Then
         self.assertEqual(action, ('position', {'x': 10, 'y': 20, 'buttons_state': 1}))
 
-    async def testCharDevice(self):
+    async def testCharDeviceName(self):
         # Given
+        event = asyncio.Event()
         char_device_instance = SpiceServerGLib.CharDeviceInstance(subtype="port",portname="test.port")
         self.server.add_interface(char_device_instance)
         self.client.connect()
         port_channel = await self.client.wait_channel_opened(SpiceClientGLib.PortChannel)
+        GObject.GObject.connect(port_channel, "notify::port-name", lambda a,b: event.set())
+        await event.wait()
 
         # Then
         self.assertEqual(port_channel.props.port_name, "test.port")
 
+    async def testCharDeviceRead(self):
+        # Given
+        char_device_instance = SpiceServerGLib.CharDeviceInstance(subtype="port",portname="test.port")
+        self.server.add_interface(char_device_instance)
+
+        read_data = GLib.Bytes.new(b"abcde")
+        def char_device_read_cb(instance, len):
+            nonlocal read_data
+            to_return = read_data
+            read_data = None
+            return to_return
+        char_device_instance.connect ("read", char_device_read_cb)
+
+        self.client.connect()
+        port_channel = await self.client.wait_channel_opened(SpiceClientGLib.PortChannel)
+        opened_event = asyncio.Event()
+        GObject.GObject.connect(port_channel, "notify::port-opened", lambda a,b: opened_event.set())
+        await opened_event.wait()
+
+        read_event = asyncio.Event()
+        received_data = None
+        def channel_port_data_cb(channel, data, size):
+            nonlocal received_data
+            ptype = ctypes.POINTER(ctypes.c_ubyte * size)
+            buffer = ptype.from_buffer(ctypes.cast(data,ptype))[0]
+            received_data = bytearray(buffer)
+            read_event.set()
+        GObject.GObject.connect(port_channel,"port-data",channel_port_data_cb)
+
+        char_device_instance.wakeup()
+        await read_event.wait()
+
+        # Then
+        self.assertEqual(b"abcde", received_data)
+
+    async def testCharDeviceWrite(self):
+        # Given
+        char_device_instance = SpiceServerGLib.CharDeviceInstance(subtype="port",portname="test.port")
+        self.server.add_interface(char_device_instance)
+
+        write_event = asyncio.Event()
+        written_data = None
+        def char_device_write_cb(instance, data):
+            nonlocal written_data
+            written_data = data
+            write_event.set()
+            return written_data.get_size()
+        char_device_instance.connect ("write", char_device_write_cb)
+
+        self.client.connect()
+        port_channel = await self.client.wait_channel_opened(SpiceClientGLib.PortChannel)
+        opened_event = asyncio.Event()
+        GObject.GObject.connect(port_channel, "notify::port-opened", lambda a,b: opened_event.set())
+        char_device_instance.port_event(SpiceServerGLib.PortEvent.OPENED)
+        await opened_event.wait()
+
+        # When
+        port_channel.write_async(b"efghi", None, lambda s,r,u: port_channel.write_finish(r), None)
+        await write_event.wait()
+
+        # Then
+        self.assertEqual (b"efghi", written_data.get_data())
 
 
 
