@@ -280,7 +280,11 @@ void ssg_char_device_instance_wakeup(SsgCharDeviceInstance *self) {
 
 }
 
-void ssg_char_device_instance_port_event(SsgCharDeviceInstance *self, gchar *device, guint8 event) {
+/**
+ * ssg_char_device_instance_port_event:
+ * @event: (type spice_port_event_t)
+ */
+void ssg_char_device_instance_port_event(SsgCharDeviceInstance *self, guint8 event) {
 
     SsgCharDeviceInstancePrivate *priv = ssg_char_device_instance_get_instance_private (self);
 

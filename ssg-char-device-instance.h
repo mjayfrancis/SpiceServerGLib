@@ -15,7 +15,7 @@ typedef struct _SsgCharDeviceInstance {
 } SsgCharDeviceInstance;
 
 void ssg_char_device_instance_wakeup(SsgCharDeviceInstance *self);
-void ssg_char_device_instance_port_event(SsgCharDeviceInstance *self, gchar *device, guint8 event);
+void ssg_char_device_instance_port_event(SsgCharDeviceInstance *self, guint8 event);
 
 G_END_DECLS
 

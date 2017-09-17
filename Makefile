@@ -100,6 +100,8 @@ SpiceServerGLib-0.1.typelib: libspiceserverglib.la
 			-e 's/type name="spice_stream_video_t"/type name="StreamingVideo"/g' \
 			-e 's/enumeration name="spice_channel_security_t"/enumeration name="ChannelSecurity"/g' \
 			-e 's/type name="spice_channel_security_t"/type name="ChannelSecurity"/g' \
+			-e 's/enumeration name="spice_port_event_t"/enumeration name="PortEvent"/g' \
+			-e 's/type name="spice_port_event_t"/type name="PortEvent"/g' \
 			SpiceServerGLib-0.1.gir
 	g-ir-compiler SpiceServerGLib-0.1.gir --output=SpiceServerGLib-0.1.typelib
 		

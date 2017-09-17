@@ -23,4 +23,10 @@ typedef enum {
     SPICE_CHANNEL_SECURITY_SSL = 2
 } spice_channel_security_t;
 
+typedef enum {
+    SPICE_PORT_EVENT_OPENED,
+    SPICE_PORT_EVENT_CLOSED,
+    SPICE_PORT_EVENT_BREAK,
+} spice_port_event_t;
+
 #endif
