@@ -364,7 +364,7 @@ class MyTest(ServerTestCaseBase):
         inputs_channel = await self.client.wait_channel_opened(SpiceClientGLib.InputsChannel)
 
         # When
-        SpiceClientGLib.inputs_key_press(inputs_channel,0x20)
+        inputs_channel.key_press(0x20)
         key = await keyboard_instance.wait_key()
 
         # Then
@@ -380,7 +380,7 @@ class MyTest(ServerTestCaseBase):
         inputs_channel = await self.client.wait_channel_opened(SpiceClientGLib.InputsChannel)
 
         # When
-        SpiceClientGLib.inputs_position(inputs_channel,10,20,0,1)
+        inputs_channel.position(10,20,0,1)
         action = await tablet_instance.wait_action()
 
         # Then
@@ -466,9 +466,12 @@ class MyTest(ServerTestCaseBase):
 
 # XXX Temporary: patch SpiceClientGLib.PortChannel if method-name fix has not been applied
 if not hasattr(SpiceClientGLib.PortChannel, "event"):
-     SpiceClientGLib.PortChannel.event = lambda self,a: SpiceClientGLib.port_event(self,a)
-     SpiceClientGLib.PortChannel.write_async = lambda self,a,b,c,d: SpiceClientGLib.port_write_async(self,a,b,c,d)
-     SpiceClientGLib.PortChannel.write_finish = lambda self,a: SpiceClientGLib.port_write_finish(self,a)
+    SpiceClientGLib.PortChannel.event = lambda self,a: SpiceClientGLib.port_event(self,a)
+    SpiceClientGLib.PortChannel.write_async = lambda self,a,b,c,d: SpiceClientGLib.port_write_async(self,a,b,c,d)
+    SpiceClientGLib.PortChannel.write_finish = lambda self,a: SpiceClientGLib.port_write_finish(self,a)
+if not hasattr(SpiceClientGLib.InputsChannel, "position"):
+    SpiceClientGLib.InputsChannel.position = lambda self,a,b,c,d: SpiceClientGLib.inputs_position(self,a,b,c,d)
+    SpiceClientGLib.InputsChannel.key_press = lambda self,a: SpiceClientGLib.inputs_key_press(self,a)
 
 if __name__ == "__main__":
         unittest.main()
