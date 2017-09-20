@@ -15,6 +15,7 @@ enum
     PROP_0,
     PROP_WIDTH,
     PROP_HEIGHT,
+    PROP_MAX_SURFACES,
     N_PROPERTIES
 };
 
@@ -53,6 +54,7 @@ struct _SsgQXLInstancePrivate {
     uint8_t *primary_surface;
     int primary_height;
     int primary_width;
+    guint max_surfaces;
 
     GAsyncQueue *queue;
 };
@@ -134,12 +136,14 @@ static void set_mm_time(SPICE_GNUC_UNUSED QXLInstance *qin,
 static void get_init_info(SPICE_GNUC_UNUSED QXLInstance *qin,
                           QXLDevInitInfo *info)
 {
+    SsgQXLInstancePrivate *priv = SPICE_CONTAINEROF(qin, SsgQXLInstancePrivate, qxl_instance);
+
     memset(info, 0, sizeof(*info));
     info->num_memslots = 1;
     info->num_memslots_groups = 1;
     info->memslot_id_bits = 1;
     info->memslot_gen_bits = 1;
-    info->n_surfaces = 2;
+    info->n_surfaces = priv->max_surfaces;
 }
 
 /* QXLInterface.get_command */
@@ -368,6 +372,10 @@ ssg_qxl_instance_set_property (GObject      *object,
             priv->primary_height = g_value_get_uint(value);
             break;
 
+        case PROP_MAX_SURFACES:
+            priv->max_surfaces = g_value_get_uint(value);
+            break;
+
         default:
             G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
             break;
@@ -391,6 +399,10 @@ ssg_qxl_instance_get_property (GObject    *object,
 
         case PROP_HEIGHT:
             g_value_set_uint(value, priv->primary_height);
+            break;
+
+        case PROP_MAX_SURFACES:
+            g_value_set_uint(value, priv->max_surfaces);
             break;
 
         default:
@@ -428,6 +440,16 @@ ssg_qxl_instance_class_init (SsgQXLInstanceClass *_class)
                     1,
                     65536,
                     1024,
+                    G_PARAM_READWRITE |
+                    G_PARAM_CONSTRUCT_ONLY);
+
+    obj_properties[PROP_MAX_SURFACES] =
+    g_param_spec_uint ("max-surfaces",
+                    "Maximum number of surfaces",
+                    "The maximum number of surfaces",
+                    1,
+                    1024,
+                    1,
                     G_PARAM_READWRITE |
                     G_PARAM_CONSTRUCT_ONLY);
 
