@@ -348,7 +348,8 @@ class MyTest(ServerTestCaseBase):
         context.rectangle(0,0,52,53)
         context.fill()
         surface.flush()
-        command = SpiceServerGLib.QXLDrawCopyCommand.new(0, 50, 51, surface, 52, 53);
+        image = SpiceServerGLib.QXLBitmapImage.new(surface)
+        command = SpiceServerGLib.QXLDrawCopyCommand.new(image, 0, 0, 52, 53, 0, 50, 51, 52, 53);
         self.server.queue_qxl_command(command)
 
         # Then

@@ -37,11 +37,17 @@ ssg-char-device-instance.lo: ssg-char-device-instance.c ssg-char-device-instance
 ssg-mouse-instance.lo: ssg-mouse-instance.c ssg-mouse-instance.h
 	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-mouse-instance.c -o ssg-mouse-instance.lo
 
+ssg-qxl-image.lo: ssg-qxl-image.c ssg-qxl-image.h
+	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-qxl-image.c -o ssg-qxl-image.lo
+
 ssg-qxl-command.lo: ssg-qxl-command.c ssg-qxl-command.h
 	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-qxl-command.c -o ssg-qxl-command.lo
 
 ssg-qxl-draw-copy-command.lo: ssg-qxl-draw-copy-command.c ssg-qxl-draw-copy-command.h
 	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-qxl-draw-copy-command.c -o ssg-qxl-draw-copy-command.lo
+
+ssg-qxl-draw-alpha-blend-command.lo: ssg-qxl-draw-alpha-blend-command.c ssg-qxl-draw-alpha-blend-command.h
+	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-qxl-draw-alpha-blend-command.c -o ssg-qxl-draw-alpha-blend-command.lo
 
 ssg-qxl-cursor-set-command.lo: ssg-qxl-cursor-set-command.c ssg-qxl-cursor-set-command.h
 	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-qxl-cursor-set-command.c -o ssg-qxl-cursor-set-command.lo
@@ -49,15 +55,19 @@ ssg-qxl-cursor-set-command.lo: ssg-qxl-cursor-set-command.c ssg-qxl-cursor-set-c
 ssg-qxl-cursor-move-command.lo: ssg-qxl-cursor-move-command.c ssg-qxl-cursor-move-command.h
 	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-qxl-cursor-move-command.c -o ssg-qxl-cursor-move-command.lo
 
+ssg-qxl-surface-create-command.lo: ssg-qxl-surface-create-command.c ssg-qxl-surface-create-command.h
+	libtool compile gcc `pkg-config --cflags gobject-2.0 spice-server cairo` -g -c ssg-qxl-surface-create-command.c -o ssg-qxl-surface-create-command.lo
 	
 
 libspiceserverglib.la: ssg-server.lo ssg-baseinstance.lo ssg-qxl-instance.lo ssg-keyboard-instance.lo \
-						  ssg-tablet-instance.lo ssg-mouse-instance.lo ssg-char-device-instance.lo ssg-enum-types.lo ssg-qxl-command.lo \
-						  ssg-qxl-draw-copy-command.lo ssg-qxl-cursor-set-command.lo ssg-qxl-cursor-move-command.lo
+						  ssg-tablet-instance.lo ssg-mouse-instance.lo ssg-char-device-instance.lo ssg-enum-types.lo ssg-qxl-image.lo ssg-qxl-command.lo \
+						  ssg-qxl-draw-copy-command.lo ssg-qxl-draw-alpha-blend-command.lo ssg-qxl-cursor-set-command.lo \
+						  ssg-qxl-cursor-move-command.lo ssg-qxl-surface-create-command.lo
 	libtool link gcc `pkg-config --libs gobject-2.0 spice-server cairo` -rpath /usr/local/lib ssg-server.lo \
 			ssg-baseinstance.lo ssg-qxl-instance.lo ssg-keyboard-instance.lo ssg-tablet-instance.lo \
-			ssg-mouse-instance.lo ssg-char-device-instance.lo ssg-enum-types.lo ssg-qxl-command.lo ssg-qxl-draw-copy-command.lo \
-			ssg-qxl-cursor-set-command.lo ssg-qxl-cursor-move-command.lo -o libspiceserverglib.la
+			ssg-mouse-instance.lo ssg-char-device-instance.lo ssg-enum-types.lo ssg-qxl-image.lo ssg-qxl-command.lo ssg-qxl-draw-copy-command.lo \
+			ssg-qxl-draw-alpha-blend-command.lo ssg-qxl-cursor-set-command.lo ssg-qxl-cursor-move-command.lo ssg-qxl-surface-create-command.lo \
+			-o libspiceserverglib.la
 
 SpiceServerGLib-0.1.typelib: libspiceserverglib.la
 	g-ir-scanner \
@@ -68,11 +78,14 @@ SpiceServerGLib-0.1.typelib: libspiceserverglib.la
 			ssg-tablet-instance.[ch] \
 			ssg-mouse-instance.[ch] \
 			ssg-char-device-instance.[ch] \
+			ssg-qxl-image.[ch] \
 			ssg-qxl-command.[ch] \
 			ssg-qxl-draw-copy-command.[ch] \
+			ssg-qxl-draw-alpha-blend-command.[ch] \
 			ssg-enum-types.[ch] \
 			ssg-qxl-cursor-set-command.[ch] \
 			ssg-qxl-cursor-move-command.[ch] \
+			ssg-qxl-surface-create-command.[ch] \
 			--accept-unprefixed \
 			--library=spiceserverglib \
 			--cflags-begin \

@@ -29,7 +29,7 @@ MOUSE_DOWN = 5
 
 class SpiceProxy(object):
 
-    def __init__(self, host, port, listen_port):
+    def __init__(self, host, port, listen_port, overlay):
         self._mainloop = GLib.MainLoop()
         self._qxlinstance = None
         self._main_channel = None
@@ -39,6 +39,7 @@ class SpiceProxy(object):
         self._command_queue = Queue()
         self._cursor_set_command = None
         self._tablet_buttons_state = 0
+        self._show_overlay = overlay
 
         # Client
 
@@ -48,7 +49,10 @@ class SpiceProxy(object):
 
         # Server
 
-        self._spiceserver = SpiceServerGLib.Server(noauth=True, port=listen_port)
+        self._spiceserver = SpiceServerGLib.Server(noauth=True, port=listen_port,
+                                                        image_compression=SpiceServerGLib.ImageCompression.OFF,
+                                                        jpeg_compression=SpiceServerGLib.WANCompression.NEVER,
+                                                        zlib_glz_compression=SpiceServerGLib.WANCompression.NEVER)
         self._spiceserver.init()
 
         self._keyboardinstance = SpiceServerGLib.KeyboardInstance()
@@ -95,13 +99,33 @@ class SpiceProxy(object):
         self._primary_width = width
         self._primary_height = height
 
-        self._qxlinstance = SpiceServerGLib.QXLInstance(width=width, height=height)
+        self._qxlinstance = SpiceServerGLib.QXLInstance(width=width, height=height, max_surfaces=3)
         self._qxlinstance.connect("attache-worker", self._qxl_attache_worker_cb)
         self._qxlinstance.connect("req-cmd-notification", self._qxl_req_cmd_notification_cb)
         self._qxlinstance.connect("get-command", self._qxl_get_command_cb)
         self._qxlinstance.connect("req-cursor-notification", self._qxl_req_cursor_notification_cb)
         self._qxlinstance.connect("get-cursor-command", self._qxl_get_cursor_command_cb)
         self._spiceserver.add_interface(self._qxlinstance)
+
+        if self._show_overlay:
+            surface1 = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+            self._command_queue.put(SpiceServerGLib.QXLSurfaceCreateCommand.new(1, surface1))
+
+            surface2 = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+            self._command_queue.put(SpiceServerGLib.QXLSurfaceCreateCommand.new(2, surface2))
+
+            draw_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
+            context = cairo.Context(draw_surface)
+            context.set_source_rgba (0, 0, 0, 0.20)
+            context.select_font_face("Purisa", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+            context.set_font_size(100)
+            for y in range(0,1000,100):
+                context.move_to(-y, y)
+                context.show_text("The quick brown fox jumped over the lazy dog")
+            draw_surface.flush()
+            image = SpiceServerGLib.QXLBitmapImage.new(draw_surface);
+            dc_command = SpiceServerGLib.QXLDrawCopyCommand.new(image, 0, 0, width, height, 2, 0, 0, width, height)
+            self._command_queue.put(dc_command)
 
     def _display_invalidate_cb(self, channel, x, y, width, height):
         update_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
@@ -111,12 +135,42 @@ class SpiceProxy(object):
         context.rectangle(0, 0, width, height)
         context.fill()
         update_surface.flush()
-        command = SpiceServerGLib.QXLDrawCopyCommand.new(0, x, y, update_surface, width, height);
+        image = SpiceServerGLib.QXLBitmapImage.new(update_surface);
+
+        commands = []
+        if not self._show_overlay:
+            commands.append(SpiceServerGLib.QXLDrawCopyCommand.new(image,
+                                                                   0, 0, width, height,
+                                                                   0,
+                                                                   x, y, width, height));
+        else:
+            # Update surface 1 with invalidated region
+            commands.append(SpiceServerGLib.QXLDrawCopyCommand.new(image,
+                                                                   0, 0, width, height,
+                                                                   1,
+                                                                   x, y, width, height));
+
+            # Blend overlay in surface 2 onto invalidated region
+            image2 = SpiceServerGLib.QXLSurfaceImage.new(2);
+            commands.append(SpiceServerGLib.QXLDrawAlphaBlendCommand.new(image2,
+                                                                         x, y, width, height,
+                                                                         1,
+                                                                         x, y, width, height));
+
+            # Copy blended invalidated region onto primary surface
+            image3 = SpiceServerGLib.QXLSurfaceImage.new(1);
+            commands.append(SpiceServerGLib.QXLDrawCopyCommand.new(image3,
+                                                                   x, y, width, height,
+                                                                   0,
+                                                                   x, y, width, height));
 
         was_empty = self._command_queue.empty()
-        self._command_queue.put(command)
+        for command in commands:
+            self._command_queue.put(command)
         if was_empty and self._qxlinstance is not None:
             self._qxlinstance.wakeup()
+
+
 
     def _cursor_notify_cb(self, channel, cursor):
         # TODO opaque cursor structure - can't use
@@ -203,9 +257,10 @@ if __name__ == '__main__':
         parser = argparse.ArgumentParser(description="Proxy a SPICE connection")
         parser.add_argument("host_port", type=host_port_type, metavar="host:port", help="Spice host to proxy")
         parser.add_argument("-p", type=int, default=5910, dest="listen_port", metavar="listen_port", help="Port to serve from")
+        parser.add_argument("--overlay", action="store_true", help="Blend a transparent overlay onto the display")
         args = parser.parse_args()
         host, port = args.host_port.split(":")
-        proxy = SpiceProxy(host=host, port=port, listen_port=args.listen_port)
+        proxy = SpiceProxy(host=host, port=port, listen_port=args.listen_port, overlay=args.overlay)
         proxy.run()
     except KeyboardInterrupt:
         sys.exit(1)

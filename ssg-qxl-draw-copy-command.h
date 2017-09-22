@@ -9,6 +9,7 @@
 #include <spice.h>
 
 #include "ssg-qxl-command.h"
+#include "ssg-qxl-image.h"
 
 G_BEGIN_DECLS
 
@@ -26,7 +27,10 @@ struct _SsgQXLDrawCopyCommandClass {
         GObjectClass parent;
 };
 
-SsgQXLDrawCopyCommand *ssg_qxl_draw_copy_command_new (guint32 surface_id, guint32 x, guint32 y, cairo_surface_t *cairo_surface, guint32 width, guint32 height);
+SsgQXLDrawCopyCommand *ssg_qxl_draw_copy_command_new (SsgQXLImage *source_image,
+        guint32 source_x, guint32 source_y, guint32 source_width, guint32 source_height,
+        guint32 dest_surface_id,
+        guint32 dest_x, guint32 dest_y, guint32 dest_width, guint32 dest_height);
 
 G_END_DECLS
 
